@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour {
     public float moveSpeed;
     public float velocity;
     public Rigidbody rb;
+    public Animator anim;
 
 	// Use this for initialization
 	void Start () {
@@ -42,11 +43,20 @@ public class PlayerController : MonoBehaviour {
     
     void Move()
     {
+        if(velocity == 0) {
+            anim.SetInteger("Condition", 0);
+            return;
+        }
+        else {
+            anim.SetInteger("Condition", 1);
+        }
         rb.MovePosition(transform.position + (Vector3.right * velocity * moveSpeed * Time.deltaTime));
     }
     
     void SetVelocity(float dir)
     {
+        if (dir < 0) transform.LookAt(transform.position + Vector3.left);
+        else if(dir > 0) transform.LookAt(transform.position + Vector3.right);
         velocity = dir;
     }
 }
