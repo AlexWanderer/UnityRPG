@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+    [Header("Movement")]
     public float moveSpeed;
     public float velocity;
     public Rigidbody rb;
     public Animator anim;
+
+    [Header("Combat")]
+    private bool attacking; 
 
 	// Use this for initialization
 	void Start () {
@@ -22,6 +26,11 @@ public class PlayerController : MonoBehaviour {
 
     void GetInput()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            print("Attacking");
+            Attack();
+        }
         // causes our character to move left
         if (Input.GetKey(KeyCode.A))
         {
@@ -29,6 +38,7 @@ public class PlayerController : MonoBehaviour {
         } else if(Input.GetKeyUp(KeyCode.A))
         {
             SetVelocity(0);
+            anim.SetInteger("Condition", 0);
         }
         // causes our character to move right
         if (Input.GetKey(KeyCode.D))
@@ -38,19 +48,23 @@ public class PlayerController : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.D))
         {
             SetVelocity(0);
+            anim.SetInteger("Condition", 0);
         }
     }
     
     void Move()
     {
         if(velocity == 0) {
-            anim.SetInteger("Condition", 0);
+      //      anim.SetInteger("Condition", 0);
             return;
         }
         else {
-            anim.SetInteger("Condition", 1);
+            if(!attacking)
+            {
+                anim.SetInteger("Condition", 1);
+                rb.MovePosition(transform.position + (Vector3.right * velocity * moveSpeed * Time.deltaTime));
+            }
         }
-        rb.MovePosition(transform.position + (Vector3.right * velocity * moveSpeed * Time.deltaTime));
     }
     
     void SetVelocity(float dir)
@@ -58,5 +72,19 @@ public class PlayerController : MonoBehaviour {
         if (dir < 0) transform.LookAt(transform.position + Vector3.left);
         else if(dir > 0) transform.LookAt(transform.position + Vector3.right);
         velocity = dir;
+    }
+
+    void Attack()
+    {
+        if (attacking) return;
+        anim.SetInteger("Condition", 2);
+        StartCoroutine(AttackRoutine());
+    }
+
+    IEnumerator AttackRoutine()
+    {
+        attacking = true;
+        yield return new WaitForSeconds(1);
+        attacking = false;
     }
 }
