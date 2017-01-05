@@ -4,14 +4,22 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-    [Header("Movement")]
-    public float moveSpeed;
-    public float velocity;
-    public Rigidbody rb;
     public Animator anim;
 
+    [Header("Movement")]
+    private bool canMove;
+    public float movementSpeed;
+    public float velocity;
+    public Rigidbody rb;
+
+
     [Header("Combat")]
-    private bool attacking; 
+    private List<Transform> enemiesInRange = new List<Transform>();
+    private bool canAttack = true;
+    private bool attacking;
+    public float attackDamage;
+    public float attackSpeed;
+    public float attackRange;
 
 	// Use this for initialization
 	void Start () {
@@ -62,7 +70,7 @@ public class PlayerController : MonoBehaviour {
             if(!attacking)
             {
                 anim.SetInteger("Condition", 1);
-                rb.MovePosition(transform.position + (Vector3.right * velocity * moveSpeed * Time.deltaTime));
+                rb.MovePosition(transform.position + (Vector3.right * velocity * movementSpeed * Time.deltaTime));
             }
         }
     }
@@ -76,15 +84,44 @@ public class PlayerController : MonoBehaviour {
 
     void Attack()
     {
-        if (attacking) return;
+        if (!canAttack) return;
         anim.SetInteger("Condition", 2);
         StartCoroutine(AttackRoutine());
+        StartCoroutine(AttackCooldown());
     }
 
     IEnumerator AttackRoutine()
     {
-        attacking = true;
-        yield return new WaitForSeconds(1);
-        attacking = false;
+        canMove = false;
+        yield return new WaitForSeconds(0.1f);
+        anim.SetInteger("Condition", 0);
+        GetEnemiesInRange();
+        foreach(Transform enemy in enemiesInRange)
+        {
+            EnemyController ec = enemy.GetComponent<EnemyController>();
+            if (ec == null) continue;
+            ec.GetHit(attackDamage);
+        }
+
+        yield return new WaitForSeconds(0.65f);
+        canMove = true;
+    }
+
+    IEnumerator AttackCooldown()
+    {
+        canAttack = false;
+        yield return new WaitForSeconds(1 / attackSpeed);
+        canAttack = true;
+    }
+
+    void GetEnemiesInRange()
+    {
+        foreach(Collider c in Physics.OverlapSphere((transform.position + transform.forward * 0.5f), 0.5f))
+        {
+            if (c.gameObject.CompareTag("Enemey"))
+            {
+                enemiesInRange.Add(c.transform);
+            }
+        }
     }
 }
