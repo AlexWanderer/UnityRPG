@@ -6,9 +6,11 @@ public class PlayerController : MonoBehaviour {
 
     public Animator anim;
 
+    public float experience;
+
     [Header("Movement")]
-    private bool canMove;
-    public float movementSpeed;
+    private bool canMove = true;
+    public float moveSpeed;
     public float velocity;
     public Rigidbody rb;
 
@@ -70,7 +72,7 @@ public class PlayerController : MonoBehaviour {
             if(!attacking)
             {
                 anim.SetInteger("Condition", 1);
-                rb.MovePosition(transform.position + (Vector3.right * velocity * movementSpeed * Time.deltaTime));
+                rb.MovePosition(transform.position + (Vector3.right * velocity * moveSpeed * Time.deltaTime));
             }
         }
     }
@@ -116,12 +118,18 @@ public class PlayerController : MonoBehaviour {
 
     void GetEnemiesInRange()
     {
+        enemiesInRange.Clear();
         foreach(Collider c in Physics.OverlapSphere((transform.position + transform.forward * 0.5f), 0.5f))
         {
-            if (c.gameObject.CompareTag("Enemey"))
+            if (c.gameObject.CompareTag("Enemy"))
             {
                 enemiesInRange.Add(c.transform);
             }
         }
+    }
+
+    public void GetExperience(float exp)
+    {
+        experience += exp;
     }
 }
