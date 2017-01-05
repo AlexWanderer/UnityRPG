@@ -87,6 +87,7 @@ public class PlayerController : MonoBehaviour {
     void Attack()
     {
         if (!canAttack) return;
+        anim.speed = attackSpeed;
         anim.SetInteger("Condition", 2);
         StartCoroutine(AttackRoutine());
         StartCoroutine(AttackCooldown());
