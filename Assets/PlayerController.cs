@@ -1,17 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour {
 
     public Animator anim;
 
-    public float experience;
+    private int level = 1;
+    private Text levelText;
+    public float experience { get; private set; }
+    private Transform experienceBar;
 
     [Header("Movement")]
     private bool canMove = true;
     public float moveSpeed;
     public float velocity;
+    public float jumpStrength;
     public Rigidbody rb;
 
 
@@ -23,9 +28,21 @@ public class PlayerController : MonoBehaviour {
     public float attackSpeed;
     public float attackRange;
 
+    [Header("Stats")]
+    private float strength;
+    private float vitality;
+    private float agility;
+    private float intelligence;
+    private float dexterity;
+    private float cunningness;
+
 	// Use this for initialization
 	void Start () {
-		
+     //   AnimationEvents.OnSlashAnimationHit += DealDamage;
+      //  AnimationEvents.OnJumpAnimationHit += JumpCallback;
+        experienceBar = UIController.instance.transform.Find("Background/Experience");
+        levelText = UIController.instance.transform.Find("Background/Level_Text").GetComponent<Text>();
+        SetExperience(0);
 	}
 	
 	// Update is called once per frame
@@ -129,8 +146,33 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    public void GetExperience(float exp)
+    public void SetExperience(float exp)
     {
         experience += exp;
+        float experienceNeeded = GameLogic.ExperienceForNextLevel(level);
+        float previousExperience = GameLogic.ExperienceForNextLevel(level - 1);
+        if(experience >= experienceNeeded)
+        {
+            LevelUp();
+            experienceNeeded = GameLogic.ExperienceForNextLevel(level);
+            previousExperience = GameLogic.ExperienceForNextLevel(level - 1);
+        }
+        experienceBar.Find("Fill").GetComponent<Image>().fillAmount = (experience - previousExperience) / (experienceNeeded - previousExperience);
+    }
+    void LevelUp()
+    {
+        level++;
+        levelText.text = "Lv. " + level.ToString("00");
+    }
+
+    private IEnumerator OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Floor"))
+        {
+            Debug.Log("Landed");
+            anim.SetInteger("Condition", 6);
+            yield return new WaitForSeconds(0.05f);
+            anim.SetInteger("Condition", 0);
+        }
     }
 }

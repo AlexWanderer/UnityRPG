@@ -49,7 +49,7 @@ public class EnemyController : MonoBehaviour {
         DropLoot();
         foreach(GameObject go in players)
         {
-            go.GetComponent<PlayerController>().GetExperience(expGranted/players.Length);
+            go.GetComponent<PlayerController>().SetExperience(expGranted/players.Length);
         }
         anim.SetInteger("Condition", 4);
         GameObject.Destroy(this.gameObject, 5);
